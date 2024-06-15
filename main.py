@@ -30,6 +30,27 @@ class URL:
         request += "\r\n"
         s.send(request.encode("utf-8"))
 
+        response = s.makefile("r", encoding="utf-8", newline="\r\n")
+
+        statusline = response.readline()
+        version, status, explanation = statusline.split(" ", 2)
+        response_headers = {}
+        while True:
+            line = response.readline()
+            if line == "\r\n": break
+            header, value = line.split(":", 1)
+            response_headers[header.casefold()] = value
+
+        assert "transfer-encoding" not in response_headers
+        assert "content-encoding" not in response_headers
+
+        content = response.read()
+        s.close()
+
+        return content
+
+
+
 
 
 
